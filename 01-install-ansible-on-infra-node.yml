@@ -1,0 +1,34 @@
+---
+- name: 01-configure-ansible-on-infra-node
+  hosts: infra
+  vars:
+    proxy_server: 67.20.167.99:3128
+  environment:
+    https_proxy: https://{{ proxy_server }}
+    http_proxy: https://{{ proxy_server }}
+    HTTPS_PROXY: https://{{ proxy_server }}
+    HTTP_PROXY: https://{{ proxy_server }}
+    no_proxy: 10.*,172.*,173.*,67.20.*,69.164.*
+    NO_PROXY: 10.*,172.*,173.*,67.20.*,69.164.*
+  tasks:
+    - name: load default variables
+      include_vars: ./global.yml
+    - name: get python pip rpm
+      command: wget https://195.220.108.108/linux/fedora/linux/releases/23/Everything/x86_64/os/Packages/p/python-pip-7.1.0-1.fc23.noarch.rpm --no-check-certificate creates=python-pip-7.1.0-1.fc23.noarch.rpm
+    - name: install python pip rpm
+      yum: name=./python-pip-7.1.0-1.fc23.noarch.rpm state=installed
+    - name: upgrade pip
+      pip: name=pip state=latest
+    - name: upgrade setuptools
+      pip: name=setuptools state=latest
+    - name: install pycsco
+      pip: name=pycsco state=latest
+    - name: install other dependencies for Ansible
+      yum: name={{item}} state=installed
+      with_items:
+        - gcc
+        - python-devel
+        - libffi-devel
+        - openssl-devel
+    - name: pip install Ansible
+      pip: name=ansible state=latest

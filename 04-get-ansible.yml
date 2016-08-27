@@ -1,0 +1,28 @@
+---
+- hosts: install
+  environment:
+    https_proxy: https://{{ proxy_server }}
+    http_proxy: https://{{ proxy_server }}
+    HTTPS_PROXY: https://{{ proxy_server }}
+    HTTP_PROXY: https://{{ proxy_server }}
+  tasks:
+    - name: load default variables
+      include_vars: ./global.yml
+    - name: install other dependencies for Ansible
+      yum: name={{item}} state=installed
+      with_items:
+        - python-pip
+        - gcc
+        - python-devel
+        - libffi-devel
+        - openssl-devel
+    
+    - name: upgrade pip
+      pip: name=pip state=latest
+      with_items:
+      - pip
+      - pysco
+      - setuptools
+      - ansible 
+#    - name: install ansible
+#      yum: name=ansible state=installed

@@ -1,0 +1,33 @@
+---
+- hosts: install
+  become: true
+  become_user: root
+#  environment:
+#    https_proxy: https://{{ proxy_server }}
+#    http_proxy: https://{{ proxy_server }}
+#    HTTPS_PROXY: https://{{ proxy_server }}
+#    HTTP_PROXY: https://{{ proxy_server }}
+#    no_proxy: '10.*,192.168.*,172.*,67.20.*,69.164.*'
+  tasks:
+  - include_vars: ./global.yml
+  - name: get latest el7 repo
+    get_url: url=http://{{osp9_repo}}/yum/el7.repo dest=/etc/yum.repos.d/
+  - name: get project repos from upstream lab repo
+    get_url: url=http://{{local_repo}}/yum/{{item}}.repo dest=/etc/yum.repos.d/
+    with_items:
+    - apollo
+    - ce_depends
+    - cisco-juno
+    - cisco-kilo
+    - demeter
+    - nikola
+    - thysa
+  - name: get osp9 repo
+    get_url: url=http://{{osp9_repo}}/yum/osp9/osp9.repo dest=/etc/yum.repos.d/
+  - name: update based on current repositories
+    yum: name='*' state=latest
+  - name: make root images directory
+    file: dest=/root/isos state=directory
+  - name: get rhel7 iso
+    get_url: url=http://{{local_repo}}/templates/rhel-server-7.2-x86_64-boot.iso
+      dest=/root/isos/rhel-server-7.2-x86_64-boot.iso

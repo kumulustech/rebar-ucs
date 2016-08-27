@@ -1,0 +1,145 @@
+#cloud-config
+hostname: {{installserver.name}}
+fqdn: {{installserver.name}}.{{internal_domain}}
+manage_etc_hosts: true
+groups:
+  - jenkins
+
+users:
+  - default
+  - name: jenkins
+    gecos: Install Server Jenkins User
+    primary-group: jenkins
+    password: $6$uleQ9MT2$OuuT24I6jCcQ7wU9bMofLRtb5v2Nu/v0pYwyJfGNlSo.eGKogEDOB/8eEXIZWgRf.XkN0r5PLgSC0PXbwWsQw/
+    sudo: 'ALL=(ALL) NOPASSWD: ALL'
+    shell: /bin/bash
+    ssh-authorized-keys:
+      - {{jenkins_public_key}}
+  - name: root
+    password: $6$uleQ9MT2$OuuT24I6jCcQ7wU9bMofLRtb5v2Nu/v0pYwyJfGNlSo.eGKogEDOB/8eEXIZWgRf.XkN0r5PLgSC0PXbwWsQw/
+    ssh-authorized-keys:
+      - {{jenkins_public_key}}
+
+ssh_pwauth: True
+
+chpasswd:
+  expire: False
+  list: |
+    root:{{os_admin_user_pass}}
+    jenkins:{{os_admin_user_pass}}
+
+write_files:
+  - path: /etc/resolv.conf
+    permissions: 0644
+    content: |
+      nameserver {{name_server_1}}
+      nameserver {{name_server_2}}
+      options rotate timeout:1
+  - path: /etc/sudoers.d/999-jenkins-cloud-init-requiretty
+    permissions: 0440
+    content: |
+      Defaults:jenkins !requiretty
+      jenkins ALL=(ALL) NOPASSWD:ALL
+  - path: /etc/sysconfig/network-scripts/ifcfg-{{installserver.mgmt_int}}
+    permissions: 0644
+    content: |
+      DEVICE={{installserver.mgmt_int}}
+      BOOTPROTO=none
+      ONBOOT=yes
+      IPADDR={{installserver.mgmt_alt_ip}}
+      NETMASK={{installserver.mgmt_alt_netmask}}
+  - path: /etc/sysconfig/network-scripts/ifcfg-{{installserver.mgmt_int}}.{{installserver.mgmt_vlan}}
+    permissions: 0644
+    content: |
+      DEVICE={{installserver.mgmt_int}}.{{installserver.mgmt_vlan}}
+      BOOTPROTO=none
+      ONBOOT=yes
+      IPADDR={{installserver.mgmt_ip}}
+      NETMASK={{installserver.mgmt_netmask}}
+      GATEWAY={{installserver.mgmt_gateway}}
+      DNS1={{name_server_1}}
+      DNS2={{name_server_2}}
+      DOMAIN={{internal_domain}}
+      VLAN=yes
+  - path: /etc/sysconfig/network-scripts/ifcfg-{{installserver.cimc_int}}
+    permissions: 0644
+    content: |
+      DEVICE={{installserver.cimc_int}}
+      BOOTPROTO=none
+      ONBOOT=yes
+      IPADDR={{installserver.cimc_ip}}
+      NETMASK={{installserver.mgmt_netmask}}
+  - path: /etc/sysconfig/network
+    permissions: 0644
+    content: |
+      NETWORKING=yes
+      NOZEROCONF=no
+      HOSTNAME={{installserver.name}}
+  - path: /var/lib/jenkins/.ssh/id_rsa
+    permissions: 0400
+    owner: jenkins:jenkins
+    content: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEpAIBAAKCAQEAvbeOpm+WRnhxl+QIBFCC0zS127oLjp+5gGMSsZnxWFdfwiqN
+      y/x4uGYKURN+KwXa90Qbxrg0RKQ6QoDQEeoGBxapgIlK13SKdoOFLlCSfCK5bUjm
+      SaKa4CPtSucAffoigjcQHu9Z/6xkOwNJXoTP/y+thfkxKlJf8nSXEI6Z5I9dAp/R
+      Y54PRq168yBlZtI3eHTBmKI+fTv+GuLHHX16bRDACmx0sLe4qS7RNA4jdkSFSXdl
+      liGThznldtEMa/hUXCiTpStYQ7Jz6pJyFpoTFpQ7lnjN72lkaux2WOWS9XMDKAWT
+      OL5SJ0Hg61dPM2dZTaV/DxKnVx7lGZF2DXMsyQIDAQABAoIBAQCgegBEcOdgvMj5
+      fn35iFDhbxjVwE2+WwWCwEszx9AKtf3eNDi1b959vHLFmgODSPSrbAVC1tX/qhtN
+      3cAjJx3qKRVAEOIp1f65uQ6S2rzOHGFVO/DwIId5SWqTjUsxRMCj/Qe54yTxzFUM
+      Rf9t4FJAvYe+Z8da0Usvv8d4zecHGXa6UtlrvQDO2vKvipWvxx9ffFOB+9w9q3Ml
+      9Fx8rOd2ZgEKViZN3FKd+zVAmMTcJA1JjcnP/lrefhfS6XyjjRDsX9c9xZNlMT6J
+      KwvwfFCPWsLDGRX6LC5Rul4XnIYmH9ilMbfuD/t2ezEZJo+6PwAj3hy4i2JR2LCy
+      m6c5Ov3BAoGBAPXEia/LLi5F5eKcQzzIznWAKKFOAG4or/kymiIGBkJqRr+xXwjV
+      wwDEW1oHEYWH5jVno1ShlS6sHLEl7yANqNGXwQLMl95pkoI/M5R6zVmDZMYzMg0G
+      tcxRz92iui4VukGOwvZaCWyhXpBEsU55xoFkFVzc0LDDV0oAxHeNYSKVAoGBAMWd
+      nXTaqmBdzfXxUZ4MuwnQH2kiKdRZnBE9cNi74FdEsINPnfpwTm707Ms5HQcyix4v
+      ixZXPgFOx50xpAbL83bBAJGwMWwrkFPRMYMsTZQ6AcSkOUhdot/7OKMxxTf5rwu4
+      k8802/nLKclmM7uGtSIB/aGjnkpN1O5Ci5h+xGhlAoGAIKP5pV9Wws6FuZMHWwtQ
+      YEqlGsdBR2Af/vi5f8tNCYUT4GGuPX4mZ/OsLkjCCvoBmRYqmxLavVged2iSWa92
+      vF9rQvPpN6DN1H6QWyf0He9Vcv1ZqGE7w+cZtFXoZDZ+hjZvrkhG+CZ2aLK22bVS
+      p9yi+bJaBR/sd+eiMD6WqAECgYAaaIPAN/CIzEBX25XinyTnnM51yED6xbbbfvBz
+      pjfGscE86wjbjOKOZWC3j7xXV+PLduMJa0M3/YUjdpzK47p3ZjdjQL56DCBPcydA
+      tkzvwAi4dJHLH+hCMlpRRLdsUYuY72OhTxkOep3s8iF7r/bIwqdYUHs4xsnrxSzO
+      hjJNGQKBgQC0qwOcchrmCqOxssllqSFcSMWMWz9wEA5kNmX/3x3xPZOuHEwVSMno
+      wxnOXWJFlQQWMihKKJyBo+DfHAHkS6dTWyCxdK16ned+DbiC7s1YKfotqH0yyI7H
+      1bCr4kPjs1zn9VEkY+MC6zilLbRakWWMoppTxWlf1f5K/NpBlxDk8w==
+      -----END RSA PRIVATE KEY-----
+  - path: /root/.ssh/id_rsa
+    permissions: 0400
+    owner: root:root
+    content: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEpAIBAAKCAQEAvbeOpm+WRnhxl+QIBFCC0zS127oLjp+5gGMSsZnxWFdfwiqN
+      y/x4uGYKURN+KwXa90Qbxrg0RKQ6QoDQEeoGBxapgIlK13SKdoOFLlCSfCK5bUjm
+      SaKa4CPtSucAffoigjcQHu9Z/6xkOwNJXoTP/y+thfkxKlJf8nSXEI6Z5I9dAp/R
+      Y54PRq168yBlZtI3eHTBmKI+fTv+GuLHHX16bRDACmx0sLe4qS7RNA4jdkSFSXdl
+      liGThznldtEMa/hUXCiTpStYQ7Jz6pJyFpoTFpQ7lnjN72lkaux2WOWS9XMDKAWT
+      OL5SJ0Hg61dPM2dZTaV/DxKnVx7lGZF2DXMsyQIDAQABAoIBAQCgegBEcOdgvMj5
+      fn35iFDhbxjVwE2+WwWCwEszx9AKtf3eNDi1b959vHLFmgODSPSrbAVC1tX/qhtN
+      3cAjJx3qKRVAEOIp1f65uQ6S2rzOHGFVO/DwIId5SWqTjUsxRMCj/Qe54yTxzFUM
+      Rf9t4FJAvYe+Z8da0Usvv8d4zecHGXa6UtlrvQDO2vKvipWvxx9ffFOB+9w9q3Ml
+      9Fx8rOd2ZgEKViZN3FKd+zVAmMTcJA1JjcnP/lrefhfS6XyjjRDsX9c9xZNlMT6J
+      KwvwfFCPWsLDGRX6LC5Rul4XnIYmH9ilMbfuD/t2ezEZJo+6PwAj3hy4i2JR2LCy
+      m6c5Ov3BAoGBAPXEia/LLi5F5eKcQzzIznWAKKFOAG4or/kymiIGBkJqRr+xXwjV
+      wwDEW1oHEYWH5jVno1ShlS6sHLEl7yANqNGXwQLMl95pkoI/M5R6zVmDZMYzMg0G
+      tcxRz92iui4VukGOwvZaCWyhXpBEsU55xoFkFVzc0LDDV0oAxHeNYSKVAoGBAMWd
+      nXTaqmBdzfXxUZ4MuwnQH2kiKdRZnBE9cNi74FdEsINPnfpwTm707Ms5HQcyix4v
+      ixZXPgFOx50xpAbL83bBAJGwMWwrkFPRMYMsTZQ6AcSkOUhdot/7OKMxxTf5rwu4
+      k8802/nLKclmM7uGtSIB/aGjnkpN1O5Ci5h+xGhlAoGAIKP5pV9Wws6FuZMHWwtQ
+      YEqlGsdBR2Af/vi5f8tNCYUT4GGuPX4mZ/OsLkjCCvoBmRYqmxLavVged2iSWa92
+      vF9rQvPpN6DN1H6QWyf0He9Vcv1ZqGE7w+cZtFXoZDZ+hjZvrkhG+CZ2aLK22bVS
+      p9yi+bJaBR/sd+eiMD6WqAECgYAaaIPAN/CIzEBX25XinyTnnM51yED6xbbbfvBz
+      pjfGscE86wjbjOKOZWC3j7xXV+PLduMJa0M3/YUjdpzK47p3ZjdjQL56DCBPcydA
+      tkzvwAi4dJHLH+hCMlpRRLdsUYuY72OhTxkOep3s8iF7r/bIwqdYUHs4xsnrxSzO
+      hjJNGQKBgQC0qwOcchrmCqOxssllqSFcSMWMWz9wEA5kNmX/3x3xPZOuHEwVSMno
+      wxnOXWJFlQQWMihKKJyBo+DfHAHkS6dTWyCxdK16ned+DbiC7s1YKfotqH0yyI7H
+      1bCr4kPjs1zn9VEkY+MC6zilLbRakWWMoppTxWlf1f5K/NpBlxDk8w==
+      -----END RSA PRIVATE KEY-----
+
+runcmd:
+  - /usr/bin/systemctl restart network
+  - systemctl disable cloud-config cloud-final cloud-init-local cloud-init
+  - rm /etc/yum.repos.d/*
+  - systemctl --system daemon-reload

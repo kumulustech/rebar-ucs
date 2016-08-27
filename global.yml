@@ -1,0 +1,130 @@
+---
+# set production variable based on target environment
+production: false
+
+# How many compute nodes are being provisioned
+num_compute: 2
+
+num_neutron: 0
+
+internal_domain: edisonqa.sgns.net
+external_domain: cloud.sungard.com
+#lab repo server
+# pre-phase2.2 repo
+local_repo: 67.20.167.115
+# OSP 9 repo
+osp9_repo: 67.20.167.102
+base_url: http://67.20.167.115/templates/openstack/
+#production repo server
+#local_repo: 69.164.113.59
+#base_url: https://69.164.113.59:/var/www/html/templates/openstack/
+
+proxy_ip: 67.20.167.99
+proxy_port: 3128
+proxy_server: "{{proxy_ip}}:{{proxy_port}}"
+
+# production site code, e.g. se1, au, etc. lab is phll
+env_site_code: phll
+# production site prefix: 20, as in se1cu{20}01, labc=3, labd=6
+env_site_num_prefix: 7
+
+name_server_1: 10.133.208.121
+name_server_2: 173.252.158.20
+
+installserver:
+  title: InstallServer
+  name: labf-install-server
+#  uuid: 383A45B4-B254-43A9-9E1F-0CE0F19826B3
+  mac_0: 52:54:0f:70:db:b3
+  mac_1: 52:54:0f:98:d2:28
+  cimc_ip: 10.133.211.52
+  cimc_netmask: 255.255.255.0
+  cimc_int: eth1
+  mgmt_ip: 10.133.210.51
+  mgmt_netmask: 255.255.255.0
+  mgmt_int: eth0
+  mgmt_vlan: 2
+  mgmt_mask: 24
+  mgmt_alt_ip: 172.31.1.51
+  mgmt_alt_netmask: 255.255.255.0
+  vcpu: 4
+  ram: 8GB
+  disk_size: 70GB
+  mgmt_bridge: br0
+  cimc_bridge: br1
+  mgmt_gateway: 10.133.210.1
+
+ipmi_key: 7187024452151715189880208451146631419765
+socks_port: 3128
+
+#If a new key is genereated in creating the service, that key should be added here
+#In addition, the key can be captured from the files/jenkins.pub file directly
+jenkins_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC9t46mb5ZGeHGX5AgEUILTNLXbuguOn7mAYxKxmfFYV1/CKo3L/Hi4ZgpRE34rBdr3RBvGuDREpDpCgNAR6gYHFqmAiUrXdIp2g4UuUJJ8IrltSOZJoprgI+1K5wB9+iKCNxAe71n/rGQ7A0lehM//L62F+TEqUl/ydJcQjpnkj10Cn9Fjng9GrXrzIGVm0jd4dMGYoj59O/4a4scdfXptEMAKbHSwt7ipLtE0DiN2RIVJd2WWIZOHOeV20Qxr+FRcKJOlK1hDsnPqknIWmhMWlDuWeM3vaWRq7HZY5ZL1cwMoBZM4vlInQeDrV08zZ1lNpX8PEqdXHuUZkXYNcyzJ jenkins@openstack
+
+#Logging server
+elastic_search_server: 10.83.249.16
+
+#VNC Server proxy address
+vncserver_proxyclient_address: 10.83.248.141
+
+orchestration_public_vlan: 62
+orchestration_public_network: 10.83.248.0/25
+
+#VIPs for loadbalancing
+#onboarding_lb_vip: 10.83.248.21
+#public_vip: 10.83.248.20
+#internal_vip: 10.83.248.140
+
+# Transport/Rabbit cluster
+
+#rabbit_ips:
+#  1: 10.83.248.133
+#  2: 10.83.248.134
+#  3: 10.83.248.135
+#
+# Global Floating IP Pool
+global_fip_pool: 207.19.99.0/27
+
+
+os_admin_user: cloud_admin
+os_admin_user_pass: admin1
+os_admin_tenant: admin
+os_auth_url: 'https://labd-public.edisonqa.sgns.net:5000/v3'
+os_region_name: labd
+os_domain_name: default
+os_user_domain_name: default
+os_identity_api_version: 3
+
+esb_user_password: esb_admin1
+
+# Keystone SSO passwords and ids
+oidcclientid: cloud
+oidcclientsecret: Sungard09
+oidccryptopassphrase: Sungard09
+
+# SEIM Log target, may change
+seim_log_target: 10.146.31.156
+seim_log_target_2: 216.203.1.112
+
+# Sysedge template Information
+## example 10.[133.210,133.213,133.214]
+sysedge_bindip_match: '10.[133.210,83.248,83.249]'
+# CA SystemEdge SNMP community info:
+case_snmp_read_communty: '0e.v9K2izh'
+case_snmp_trap_community: 'public 64.238.199.208;public 213.212.65.208;public 64.238.199.200;public 213.212.65.200'
+
+# SSSD Information
+#sssd_realm: oamp.sgns.net
+sssd_realm: edisonqa.sgns.net
+#sssd_user: cloudsssd.acc
+sssd_user: linuxjoin
+sssd_domain: labd
+sssd_domain_passwd: Password1234
+
+apollo_region: SungardAS-IntegrationLab
+
+ip_types:
+ - public_ip
+ - control_ip
+ - data_ip
+ - tools_ip

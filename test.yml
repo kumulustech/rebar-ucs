@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    instance:
+      name: rebar
+      mem: 8192
+      cpu: 8
+      mac_1: 52:54:01:6e:01:a1
+      mac_2: 52:54:01:6e:01:b1
+      mgmt_int: eth0
+      mgmt_vlan: 2
+      mgmt_ip: 10.133.210.51
+      mgmt_net: 24
+      cimc_int: eth1
+      cimc_ip: 10.133.211.51
+      cimc_net: 24
+
+    rhel_cloud_image: rhel-guest-image-7.2-20160302.0.x86_64.qcow2
+    jenkins_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC9t46mb5ZGeHGX5AgEUILTNLXbuguOn7mAYxKxmfFYV1/CKo3L/Hi4ZgpRE34rBdr3RBvGuDREpDpCgNAR6gYHFqmAiUrXdIp2g4UuUJJ8IrltSOZJoprgI+1K5wB9+iKCNxAe71n/rGQ7A0lehM//L62F+TEqUl/ydJcQjpnkj10Cn9Fjng9GrXrzIGVm0jd4dMGYoj59O/4a4scdfXptEMAKbHSwt7ipLtE0DiN2RIVJd2WWIZOHOeV20Qxr+FRcKJOlK1hDsnPqknIWmhMWlDuWeM3vaWRq7HZY5ZL1cwMoBZM4vlInQeDrV08zZ1lNpX8PEqdXHuUZkXYNcyzJ jenkins@openstack
+  tasks:
+  - include: tasks/create_vm.yml
+

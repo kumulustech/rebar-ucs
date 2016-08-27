@@ -1,0 +1,78 @@
+physical:
+  kvm:
+    name: none
+    mac_0: none
+    mac_1: none
+    mgmt_ip: 'none'
+    cimc_ip: 'none'
+    admin_user: 'none'
+    admin_pass: 'none'
+    businfo: pci@0000:81:00
+    firmware: 'bc 7.4.19 phy aa0.511'
+    driver: bnx2x
+  compute:
+    name: none
+    mac_0: none
+    mac_1: none
+    mgmt_ip: 'none'
+    cimc_ip: 'none'
+    admin_user: 'none'
+    admin_pass: 'none'
+    businfo: pci@0000:03:00
+    firmware: 'bc 7.4.19'
+    driver: bnx2x
+  openstackkvmhost1:
+    title: OpenStackKVMHost(hypervisor)1
+    name: phllsu328
+    mac_0: 00:10:18:db:e6:64
+    mac_1: 00:10:18:db:e6:66
+    cimc_ip: 10.88.91.178
+    admin_user: admin
+    admin_pass: admin1
+    mgmt_ip: 10.133.210.40
+    gateway: 10.133.210.1
+    storage_ip: 10.140.231.80
+  openstackkvmhost2:
+    title: OpenStackKVMHost(hypervisor)2
+    name: phllsu329
+    mac_0: 00:10:18:eb:55:8c
+    mac_1: 00:10:18:eb:55:8e
+    cimc_ip: 10.88.91.176
+    admin_user: admin
+    admin_pass: admin1
+    mgmt_ip: 10.133.210.41
+    gateway: 10.133.210.1
+    storage_ip: 10.140.231.81
+  openstackkvmhost3:
+    title: OpenStackKVMHost(hypervisor)3
+    name: phllsu330
+    mac_0: 00:10:18:eb:53:c8
+    mac_1: 00:10:18:eb:53:ca
+    cimc_ip: 10.88.91.174
+    admin_user: admin
+    admin_pass: admin1
+    mgmt_ip: 10.133.210.42
+    gateway: 10.133.210.1
+    storage_ip: 10.140.231.82
+  computenode1:
+    title: Computenode1
+    name: phllsu331
+    mac_0: 00:10:18:db:ea:6c
+    mac_1: 00:10:18:db:ea:6e
+    cimc_ip: 10.88.91.183
+    admin_user: admin
+    admin_pass: admin1
+    mgmt_ip: 10.133.210.43
+    gateway: 10.133.210.1
+    storage_ip: 10.140.231.83
+  computenode2:
+    title: Computenode2
+    name: phllsu332
+    mac_0: 00:10:18:eb:46:b8
+    mac_1: 00:10:18:eb:46:ba
+    cimc_ip: 10.88.91.181
+    admin_user: admin
+    admin_pass: admin1
+    mgmt_ip: 10.133.210.44
+    gateway: 10.133.210.1
+    storage_ip: 10.140.231.84

@@ -1,0 +1,80 @@
+---
+- hosts: install
+  become: true
+  become_user: root
+  environment:
+    https_proxy: https://{{ proxy_server }}
+    http_proxy: https://{{ proxy_server }}
+    HTTPS_PROXY: https://{{ proxy_server }}
+    HTTP_PROXY: https://{{ proxy_server }}
+  tasks:
+  - include_vars: ./global.yml
+  - include_vars: ./physical.yml
+  
+  - name: install epel-release
+    yum: name=epel-release state=installed
+  - name: install prerequisites
+    yum: name={{item}} state=latest
+    with_items:
+    - jq
+    - git
+    - vim
+    - htop
+    - python-netaddr
+  - name: create digital rebar directory
+    file: dest=/root/digitalrebar state=directory
+  - name: get rebar deploy code
+    git: >
+      repo=https://github.com/rackn/digitalrebar-deploy.git
+      dest=/root/digitalrebar/deploy
+    ignore_errors: true
+  - name: update common environment for proxy
+    template: src=templates/common_env.j2 dest=/root/digitalrebar/deploy/compose/common.env
+
+  - name: make iso cache directory
+    file: dest=/root/digitalrebar/deploy/tftpboot/isos state=directory
+  - name: move RHEL ISO to digitalrebar directory for upload
+    command: 'cp /root/isos/rhel-server-7.2-x86_64-boot.iso /root/digitalrebar/deploy/tftpboot/isos/'
+  - name: environment setup
+    template: src=templates/environment.j2 dest=/etc/environment
+
+  - name: create docker repo
+    copy: src=files/docker.repo dest=/etc/yum.repos.d/docker.repo
+  - name: install docker
+    yum: name=docker-engine state=latest
+  - name: add proxy environment to docker
+#    ini_file: dest=/usr/lib/systemd/system/docker.service section=Service option=Environment value={{item}}
+    lineinfile: dest=/usr/lib/systemd/system/docker.service insertafter='.*Service.*' line='Environment={{item}}'
+    with_items:
+    - 'https_proxy=https://67.20.167.99:3128'
+    - 'http_proxy=https://67.20.167.99:3128'
+    - 'HTTPS_PROXY=https://67.20.167.99:3128'
+    - 'HTTP_PROXY=https://67.20.167.99:3128'
+    - 'no_proxy=10.*,172.*,173.*,67.20.*,69.164.*'
+    - 'NO_PROXY=10.*,172.*,173.*,67.20.*,69.164.*'
+     
+  - name: daemon-reload systemctl
+    command: systemctl daemon-reload
+  - name: enable docker
+    service: name=docker state=restarted enabled=yes
+  - name: install docker-compose
+    shell: curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+    args:
+      creates: /usr/local/bin/docker-compose
+  - name: ensure docker-compose is executable
+    file: dest=/usr/local/bin/docker-compose mode=0755
+
+  - name: look for private keys
+    find: path=/root/.ssh pattern='id_rsa.*'
+    register: root_priv
+  - name: create labf ssh pub/priv keys
+    command: ssh-keygen -t rsa -f /root/.ssh/id_rsa -N ''
+    when: root_priv.matched == 0
+  - name: get labf ssh private key
+    fetch: src=/root/.ssh/id_rsa dest=files/id_rsa flat=yes
+  - name: get labf ssh public key
+    fetch: src=/root/.ssh/id_rsa.pub dest=files/id_rsa.pub flat=yes
+  - name: add public key to authorized keys
+    authorized_key: 
+      user: root
+      key:  "{{ lookup('file', 'files/id_rsa.pub') }}"  

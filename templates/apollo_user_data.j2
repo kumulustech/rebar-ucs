@@ -1,0 +1,54 @@
+#cloud-config
+hostname: {{item.value.name}}
+fqdn: {{item.value.name}}.{{internal_domain}}
+manage_etc_hosts: true
+groups:
+  - jenkins
+users:
+  - default
+  - name: jenkins
+    gecos: Red Hat Jenkins User
+    primary-group: jenkins
+    password: $6$uleQ9MT2$OuuT24I6jCcQ7wU9bMofLRtb5v2Nu/v0pYwyJfGNlSo.eGKogEDOB/8eEXIZWgRf.XkN0r5PLgSC0PXbwWsQw/
+    shell: /bin/bash
+    ssh-authorized-keys:
+      - {{jenkins_public_key}}
+write_files:
+  - path: /etc/resolv.conf
+    content: |
+      dnsserver {{external_services.dnsserver1.ip}}
+      dnsserver {{external_services.dnsserver2.ip}}
+      options rotate timeout:1
+      domain {{internal_domain}}
+  - path: /etc/sudoers.d/999-jenkins-cloud-init-requiretty
+    permissions: 0440
+    content: |
+      Defaults:jenkins !requiretty
+      jenkins ALL=(ALL) NOPASSWD:ALL
+  - path: /etc/sysconfig/network-scripts/ifcfg-eth0
+    content: |
+      DEVICE=eth0
+      BOOTPROTO=none
+      ONBOOT=no
+  - path: /etc/sysconfig/network-scripts/ifcfg-eth0.{{network.orchestrationpublic.vlan}}
+    content: |
+      DEVICE=eth0.{{network.orchestrationpublic.vlan}}
+      BOOTPROTO=none
+      ONBOOT=yes
+      IPADDR={{item.value.public_ip}}
+      PREFIX=25
+      VLAN=yes
+  - path: /etc/sysconfig/network
+    content: |
+      NETWORKING=yes
+      NOZEROCONF=no
+      GATEWAY={{item.value.gateway}}
+      HOSTNAME={{item.value.name}}
+      DNS1={{external_services.dnsserver1.ip}}
+      DNS2={{external_services.dnsserver2.ip}}
+  - path: /etc/hostname
+    content: |
+      {{item.value.name}}
+runcmd:
+  - /usr/bin/systemctl restart network
+  - systemctl disable cloud-config cloud-final cloud-init-local cloud-init

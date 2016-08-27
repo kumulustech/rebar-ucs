@@ -1,0 +1,26 @@
+---
+- hosts: infra
+  connection: local
+  become: true
+  become_user: root
+  tasks:
+  - include_vars: ./global.yml
+  - name: find all libvirt VMs
+    shell: virsh list --all | awk '/running|shut/ {print $2}' | grep '{{installserver.name}}'
+    register: vm_list
+  - name: stop the VMs from running
+    shell: virsh destroy {{item}}
+    with_items: "{{vm_list.stdout_lines}}"
+    ignore_errors: true
+  - name: delete the VMs definitions
+    shell: virsh undefine {{item}}
+    with_items: "{{vm_list.stdout_lines}}"
+    ignore_errors: true
+  - name: find all of the VM images
+    find: path=/var/lib/libvirt/images pattern='{{installserver.name}}*'
+    register: images_list
+  - name: delete the images from the system
+    file: dest={{item.path}} state=absent
+    with_items: "{{images_list.files}}"
+  - name: delete the image-server user-data directroy
+    file: dest="/root/{{installserver.name}}" state=absent

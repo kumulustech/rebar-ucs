@@ -1,0 +1,5 @@
+.cachedir
+*.retry
+.DS_Store
+.vault_pass.txt
+deployment_key

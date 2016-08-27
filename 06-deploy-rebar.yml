@@ -1,0 +1,14 @@
+---
+- hosts: install
+  tasks:
+  - include_vars: ./global.yml
+  - name: update compose.yml removing non-required ISO uploads
+    copy: src=files/compose.yml dest=/root/digitalrebar/deploy/tasks/compose.yml
+  - name: remove network config
+    file: dest=digitalrebar/deploy/compose/config-dir/api/config/networks/the_admin.json state=absent
+  - name: update network config
+    template: src=templates/the_admin_json.j2 dest=digitalrebar/deploy/compose/config-dir/api/config/networks/the_admin.json
+  - name: run rebar install script
+    command: ./run-in-system.sh --deploy-admin=local --admin-ip={{installserver.mgmt_ip}}/{{installserver.mgmt_netmask|ipaddr('prefix')}} --access=HOST --con-provisioner --con-dhcp --wl-hardware --wl-docker chdir=/root/digitalrebar/deploy
+    register: rebar_out
+  - debug: var=rebar_out

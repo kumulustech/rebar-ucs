@@ -1,0 +1,29 @@
+---
+- name: check to ensure we have not previously launched our VM
+  command: virsh list --name --all
+  register: virsh_list
+#- name: copy qcow from repository
+#  get_url: url=http://{{local_repository}}/templates/{{rhel_cloud_image}} dest=/var/lib/libvirt/images/{{rhel_cloud_image}}
+- name: link a copy of the image
+  command: qemu-img create -f qcow2 -b {{rhel_cloud_image}} {{instance_name}}.qcow2
+  args:
+    chdir: /var/lib/libvirt/images
+    creates: /var/lib/libvirt/images/"{{instance_name}}.qcow2"
+- name: create a directory to store the metadata and userdata files for the instance
+  file: dest=/var/lib/libvirt/cloud-init/"{{instance_name}}" recurse=yes state=directory
+- name: create a meta-data file for the instance
+  template: src=templates/meta_data.j2 dest=/var/lib/libvirt/cloud-init/"{{instance_name}}"/meta-data
+- name: create a user-data file for the instance
+  template: src=templates/user_data.j2 dest=/var/lib/libvirt/cloud-init/"{{instance_name}}"/user-data
+- name: create a cloud-init config-drive image for the instance
+  command: genisoimage -output /var/lib/libvirt/cloud-init/{{instance_name}}.iso -volid cidata -joliet -rock user-data meta-data
+  args:
+    creates: /var/lib/libvirt/cloud-init/{{instance_name}}.iso
+    chdir: /var/lib/libvirt/cloud-init/{{instance_name}}/
+- name: create the vm
+  template: src=templates/domain_xml.j2 dest=/var/lib/libivirt/images/{{instance_name}}.xml
+- name: launch the install server VM creation
+  virt: name={{instance_name}}
+        command=define
+        xml=/var/lib/libivirt/images/{{instance_name}}.xml
+  when: "virsh_list.stdout | search('{{installserver.name}}') == false"

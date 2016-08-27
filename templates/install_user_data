@@ -1,0 +1,65 @@
+#cloud-config
+hostname: labf-director
+fqdn: labf-director.edisonqa.sgns.net
+manage_etc_hosts: true
+groups:
+  - jenkins
+users:
+  - default
+  - name: jenkins
+    gecos: Red Hat Jenkins User
+    primary-group: jenkins
+    password: $6$uleQ9MT2$OuuT24I6jCcQ7wU9bMofLRtb5v2Nu/v0pYwyJfGNlSo.eGKogEDOB/8eEXIZWgRf.XkN0r5PLgSC0PXbwWsQw/
+    shell: /bin/bash
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyjqFj5gU/UTZsYVO00fdrDG8yh/h3/dgIdnQgzGyY64fHzT1LfCob2nx1wS83x1slj8me3pLhAQBwArnJ8LLU+oKm4WQQZPGQ0vTNp7fkgeijDJqvsRsiqO3ceTwJeSFBmilFa6Zk5MDnvqe7QovpsQjfx+631Xx1EJnGAN+CFVTJLTQJfU3njjkRTjT61ms7gSJe7LFhfSFs03LefyTPIrdumAtpVI+iwN823U9/byD1fquciWaVnKpX7UH0wCCxnz3bAzEzhRGydrImNuw1TJ4YjOvSDE6Fx8Xhz/dgf2+8AhfKC38Pu59l1Ke6h3xMO3/mzc4vq7r/2RxbdChL jenkins@openstack
+
+write_files:
+  - path: /etc/resolv.conf
+    content: |
+      nameserver 10.133.208.121
+      nameserver 173.252.158.20
+      options rotate timeout:1
+  - path: /etc/sudoers.d/999-jenkins-cloud-init-requiretty
+    permissions: 0440
+    content: |
+      Defaults:jenkins !requiretty
+      jenkins ALL=(ALL) NOPASSWD:ALL
+  - path: /etc/sysconfig/network-scripts/ifcfg-eth0
+    content: |
+      DEVICE=eth0
+      BOOTPROTO=none
+      ONBOOT=no
+  - path: /etc/sysconfig/network-scripts/ifcfg-eth0.2
+    content: |
+      DEVICE=eth0.2
+      BOOTPROTO=none
+      ONBOOT=yes
+      IPADDR=10.133.210.51
+      PREFIX=24
+      VLAN=yes
+      DNS1=10.133.208.121
+      DNS2=173.252.158.20
+  - path: /etc/sysconfig/network-scripts/ifcfg-eth1
+    content: |
+      DEVICE=eth1
+      BOOTPROTO=none
+      ONBOOT=yes
+      IPADDR=10.133.211.52
+      PREFIX=24
+      VLAN=no
+      DNS1=10.133.208.121
+      DNS2=173.252.158.20
+  - path: /etc/sysconfig/network
+    content: |
+      NETWORKING=yes
+      NOZEROCONF=no
+      GATEWAY=10.133.210.1
+      GATEWAYDEV=eth0.2
+      HOSTNAME=labf-director
+  - path: /etc/hostname
+    content: |
+      labf-director
+runcmd:
+  - /usr/bin/systemctl restart network
+  - systemctl disable cloud-config cloud-final cloud-init-local cloud-init

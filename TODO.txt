@@ -1,0 +1,10 @@
+install server:
+ - add docker
+ - add docker compose
+ - enable proxy by default for shell (environment file)
+ - enable proxy by default for docker (/etc/systemd/system/multi-user*/docker.service
+ - clone rackn digitalrebar install
+ - create LLD->data file mapping, do we even need to build a datafile, or can we manage vi direct compilation (how to deal with generated data such as mac addresses, UUIDs, etc.)
+
+investigate:
+ - updating digitalrebar install for install-server config (updates and tweaks?)
