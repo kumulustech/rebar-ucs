@@ -24,3 +24,5 @@
     with_items: "{{images_list.files}}"
   - name: delete the image-server user-data directroy
     file: dest="/root/{{installserver.name}}" state=absent
+  - name: remove ssh host key
+    command: ssh-keygen -R {{installserver.mgmt_ip}}

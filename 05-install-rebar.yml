@@ -21,20 +21,13 @@
     - vim
     - htop
     - python-netaddr
-  - name: create digital rebar directory
-    file: dest=/root/digitalrebar state=directory
-  - name: get rebar deploy code
-    git: >
-      repo=https://github.com/rackn/digitalrebar-deploy.git
-      dest=/root/digitalrebar/deploy
-    ignore_errors: true
-  - name: update common environment for proxy
-    template: src=templates/common_env.j2 dest=/root/digitalrebar/deploy/compose/common.env
+  - name: create ansible tower directory
+    file: dest=/root/tower state=directory
+  - name: get ansible-tower deploy code
+    command: curl -o /root/ansible-tower-setup-bundle-3.0.1-1.el7.tar.gz https://releases.ansible.com/ansible-tower/setup-bundle/ansible-tower-setup-bundle-3.0.1-1.el7.tar.gz creates=/root/ansible-tower-setup-bundle-3.0.1-1.el7.tar.gz
+  - name: extract ansible tower bundle
+    unarchive: dest=/root/tower src=/root/ansible-tower-setup-bundle-3.0.1-1.el7.tar.gz copy=no
 
-  - name: make iso cache directory
-    file: dest=/root/digitalrebar/deploy/tftpboot/isos state=directory
-  - name: move RHEL ISO to digitalrebar directory for upload
-    command: 'cp /root/isos/rhel-server-7.2-x86_64-boot.iso /root/digitalrebar/deploy/tftpboot/isos/'
   - name: environment setup
     template: src=templates/environment.j2 dest=/etc/environment
 
@@ -43,7 +36,6 @@
   - name: install docker
     yum: name=docker-engine state=latest
   - name: add proxy environment to docker
-#    ini_file: dest=/usr/lib/systemd/system/docker.service section=Service option=Environment value={{item}}
     lineinfile: dest=/usr/lib/systemd/system/docker.service insertafter='.*Service.*' line='Environment={{item}}'
     with_items:
     - 'https_proxy=https://67.20.167.99:3128'
