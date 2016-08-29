@@ -22,11 +22,11 @@
     - htop
     - python-netaddr
   - name: create ansible tower directory
-    file: dest=/root/tower state=directory
-  - name: get ansible-tower deploy code
-    command: curl -o /root/ansible-tower-setup-bundle-3.0.1-1.el7.tar.gz https://releases.ansible.com/ansible-tower/setup-bundle/ansible-tower-setup-bundle-3.0.1-1.el7.tar.gz creates=/root/ansible-tower-setup-bundle-3.0.1-1.el7.tar.gz
-  - name: extract ansible tower bundle
-    unarchive: dest=/root/tower src=/root/ansible-tower-setup-bundle-3.0.1-1.el7.tar.gz copy=no
+    file: dest=/root/digitalrebar state=directory
+  - name: get rebar deploy code
+    git: clone=yes dest=/root/digitalrebar/deploy repo=https://github.com/rackn/digitalrebar-deploy.git
+  - name: create deploy link
+    file: src=/root/digitalrebar dest=/root/digitalrebar/deploy/compose/digitalrebar state=link
 
   - name: environment setup
     template: src=templates/environment.j2 dest=/etc/environment

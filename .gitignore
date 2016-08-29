@@ -3,3 +3,5 @@
 .DS_Store
 .vault_pass.txt
 deployment_key
+files/id_rsa*
+
