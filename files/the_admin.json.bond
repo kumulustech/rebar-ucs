@@ -1,0 +1,29 @@
+{
+  "category": "admin",
+  "group": "internal",
+  "deployment": "system",
+  "conduit": "10g0","10g1",
+  "team_mode": 4,
+  "use_team": true,
+  "ranges": [
+    {
+      "name": "admin",
+      "first": "172.31.1.51/24",
+      "last": "172.31.1.52/24"
+    },
+    {
+      "name": "host",
+      "first": "172.31.1.200/24",
+      "last": "172.31.1.254/24"
+    },
+    {
+      "name": "dhcp",
+      "first": "172.31.1.150/24",
+      "last": "172.31.1.199/24"
+    }
+  ],
+  "router": {
+    "address": "172.31.1.51/24",
+    "pref": 10
+  }
+}
