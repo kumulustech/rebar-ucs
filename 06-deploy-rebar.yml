@@ -46,3 +46,5 @@
     command: ./run-in-system.sh --deploy-admin=local --admin-ip={{installserver.mgmt_ip}}/{{installserver.mgmt_netmask|ipaddr('prefix')}} --access=HOST --con-provisioner --con-dhcp --wl-hardware --wl-docker chdir=/root/digitalrebar/deploy
     register: rebar_out
   - debug: var=rebar_out
+  - name: copy rebar app to /usr/local/bin
+    copy: src=/root/digitalrebar/deploy/rebar dest=/usr/local/bin/rebar remote_src=true
