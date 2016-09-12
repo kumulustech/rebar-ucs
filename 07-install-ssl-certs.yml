@@ -1,0 +1,23 @@
+---
+- hosts: install
+  become: true
+  become_user: root
+  pre_tasks:
+  - name: include variables
+    include_vars: ./global.yml
+  tasks:
+  - name: upload controller ssl certificate
+    copy: src=/home/ssl/{{item}} dest=/etc/ssl/certs/{{item}} owner=root group=root mode=0400
+    with_items:
+      - "{{os_region_name}}.pem"
+      - cloud.sungardas.com.crt
+      - cloud.sungardas.com.key
+      - entrust_l1c.crt
+      - star_edisonqa.sgns.net.crt
+      - star_edisonqa.sgns.net.key
+      - star_edisonqa.sgns.net.pem
+      - ca_edisonqa.sgns.net.crt
+  - name: upload pki cert
+    copy: src=/home/ssl/ca_edisonqa.sgns.net.crt dest=/etc/pki/ca-trust/source/anchors/ca_edisonqa.sgns.net.crt owner=root group=root mode=0400
+  - name: register certs locally
+    command: update-ca-trust

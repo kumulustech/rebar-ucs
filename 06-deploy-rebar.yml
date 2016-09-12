@@ -2,16 +2,42 @@
 - hosts: install
   tasks:
   - include_vars: ./global.yml
-  - name: update compose.yml removing non-required ISO uploads
-    copy: src=files/compose.yml dest=/root/digitalrebar/deploy/tasks/compose.yml
   - name: remove network config
-    file: dest=digitalrebar/deploy/compose/config-dir/api/config/networks/the_admin.jsoni.mac state=absent
+    file: dest=digitalrebar/deploy/compose/config-dir/api/config/networks/the_admin.json.mac state=absent
   - name: update network config
     template: src=templates/the_admin_json.j2 dest=digitalrebar/deploy/compose/config-dir/api/config/networks/the_admin.json.mac
   - name: update compose environment for proxy
     lineinfile: dest=/root/digitalrebar/deploy/compose/common.env line="UPSTREAM_PROXY_ADDRESS=67.20.167.99"
   - name: update compose environmet proxy port
     lineinfile: dest=/root/digitalrebar/deploy/compose/common.env line="UPSTREAM_PROXY_PORT=3128"
+
+  - name: get core repo
+    git: clone=yes src=https://github.com/digitalrebar/core.git dest=/root/digitalrebar/core
+  - name: fix network model to include broadcom interfaces
+    copy: src=files/network.yml dest=/root/digitalrebar/core/barclamps/network.yml
+  - name: fix nic discovery files
+    copy: src=files/nic.rb dest=/root/digitalrebar/core/chef/cookbooks/barclamp/libraries/nic.rb
+  - name: fix default network files
+    copy: src=files/default.rb dest=/root/digitalrebar/core/chef/cookbooks/network/recipes/default.rb
+  - name: fix chef rebar files
+    copy: src=files/chef_rebar.rb dest=/root/digitalrebar/core/chef/cookbooks/ohai/files/default/plugins/rebar.rb
+  - name: fix inventory plugin files
+    copy: src=files/inv_rebar.rb dest=/root/digitalrebar/core/script/roles/rebar-inventory/plugin/rebar.rb
+ 
+  - name: ensure raid cache directory exists
+    file: dest=/root/.cache/digitalrebar/tftpboot/files/raid/ state=directory
+  - name: add RAID config files for hardware discovery/config
+    copy: src=files/{{item}} dest=/root/.cache/digitalrebar/tftpboot/files/raid/
+    with_items:
+    - SAS2IRCU_P20.zip
+    - 8.07.14_MegaCLI.zip
+  
+  - name: update bashrc with rebar access defaults
+    lineinfile: dest=/root/.bashrc  line={{item}}
+    with_items:
+    - 'export REBAR_ENDPOINT=https://10.133.210.51'
+    - 'export REBAR_KEY=rebar:rebar1'
+
 #  - name: get core code to allow network update
 #    git: clone=yes repo=https://github.com/digitalrebar/core/ dest=/root/digitalrebar/core/
 #  - name: update network barclamp

@@ -28,6 +28,8 @@ env_site_code: phll
 # production site prefix: 20, as in se1cu{20}01, labc=3, labd=6
 env_site_num_prefix: 7
 
+vld: /var/lib/docker
+
 name_server_1: 10.133.208.121
 name_server_2: 173.252.158.20
 
