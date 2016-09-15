@@ -29,5 +29,6 @@
   - name: make root images directory
     file: dest=/root/isos state=directory
   - name: get rhel7 iso
-    get_url: url=http://{{local_repo}}/templates/rhel-server-7.2-x86_64-boot.iso
+    #get_url: url=http://{{local_repo}}/templates/rhel-server-7.2-x86_64-boot.iso
+    get_url: url=http://{{local_repo}}/templates/rhel-server-7.2-x86_64-dvd.iso
       dest=/root/isos/rhel-server-7.2-x86_64-boot.iso
