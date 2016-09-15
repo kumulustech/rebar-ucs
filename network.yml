@@ -1,0 +1,127 @@
+network:
+  infrastructuremanagement:
+    title: InfrastructureManagement
+    vlan: 2
+    network: 10.133.210.0
+    netmask: 24
+    route: 10.133.210.1
+    notes:
+  outofbandmanagement:
+    title: OutOfBandManagement
+    vlan: 5
+    network: 10.133.211.0
+    netmask: 24
+    route:
+    notes:
+  storage:
+    title: Storage
+    vlan: 10
+    network: 10.140.231.0
+    netmask: 24
+    route:
+    notes:
+  orchestrationpublic:
+    title: OrchestrationPublic
+    vlan: 62
+    network: 10.83.248.0
+    netmask: 25
+    route:
+    notes:
+  orchestrationcontrol:
+    title: OrchestrationControl
+    vlan: 63
+    network: 10.83.248.128
+    netmask: 25
+    route:
+    notes:
+  orchestrationtools:
+    title: OrchestrationTools
+    vlan: 64
+    network: 10.83.249.0
+    netmask: 25
+    route:
+    notes:
+  orchestrationdata:
+    title: OrchestrationData
+    vlan: 65
+    network: 10.83.249.128
+    netmask: 25
+    route:
+    notes:
+  customerfippool:
+    title: CustomerPublicFIPPool
+    vlan: 66
+    network: 207.19.99.0
+    netmask: 27
+    route:
+    notes:
+  hypervisorsnatpool:
+    title: HypervisorSNATPool
+    vlan: 66
+    network: 173.252.157.64
+    netmask: 28
+    route:
+    notes:
+  custinetl3out:
+    title: Cust-inet-l3out
+    vlan: 67
+    network: 10.83.250.32
+    netmask: 28
+    route:
+    notes:
+  firewallprivate:
+    title: FirewallPrivate
+    vlan: 68
+    network: 10.83.250.0
+    netmask: 28
+    route:
+    notes:
+  firewallpublic:
+    title: FirewallPublic
+    vlan: 31
+    network: 208.16.215.0
+    netmask: 26
+    route:
+    notes:
+  orchl3out:
+    title: OrchL3out
+    vlan: 69
+    network: 10.83.250.16
+    netmask: 28
+    route:
+    notes:
+  servicemanagement:
+    title: ServiceManagement
+    vlan: 70
+    network: 10.146.150.128
+    netmask: 25
+    route:
+    notes:
+  osmanagementnatpool:
+    title: OSManagementNATpool
+    vlan: 71
+    network: 10.146.151.0
+    netmask: 25
+    route:
+    notes:
+  firewallsync:
+    title: FirewallSync
+    vlan: 72
+    network: 169.254.1.0
+    netmask: 29
+    route:
+    notes:
+  customerosmgmtl3out:
+    title: CustomerOS-MgmtL3out
+    vlan: 73
+    network: 10.83.250.48
+    netmask: 28
+    route:
+    notes:
+  servicemgmtl3out:
+    title: Service-mgmt-l3out
+    vlan: 74
+    network: 10.83.250.64
+    netmask: 28
+    route:
+    notes:

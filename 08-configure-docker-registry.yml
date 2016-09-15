@@ -8,8 +8,8 @@
   tasks:
   - name: create docker registry compose file
     template: src=templates/registry_yml.j2 dest={{vld}}/docker-compose.yml mode=0644
-  - name: restart docker
-    service: name=docker state=restarted
+#  - name: restart docker
+#    service: name=docker state=restarted
   - name: check to see if docker registry is running
     command: docker ps
     register: docker_ps

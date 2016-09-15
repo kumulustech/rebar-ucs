@@ -38,12 +38,13 @@
   - name: add proxy environment to docker
     lineinfile: dest=/usr/lib/systemd/system/docker.service insertafter='.*Service.*' line='Environment={{item}}'
     with_items:
-    - 'https_proxy=https://67.20.167.99:3128'
-    - 'http_proxy=https://67.20.167.99:3128'
-    - 'HTTPS_PROXY=https://67.20.167.99:3128'
-    - 'HTTP_PROXY=https://67.20.167.99:3128'
-    - 'no_proxy=10.*,172.*,173.*,67.20.*,69.164.*'
-    - 'NO_PROXY=10.*,172.*,173.*,67.20.*,69.164.*'
+    - 'https_proxy=https://{{ proxy_server }}'
+    - 'http_proxy=https://{{ proxy_server }}'
+    - 'HTTPS_PROXY=https://{{ proxy_server }}'
+    - 'HTTP_PROXY=https://{{ proxy_server }}'
+    - 'no_proxy={{ proxy_server }}'
+    - 'NO_PROXY={{ proxy_server }}'
+    - 'MountFlags=shared'
      
   - name: daemon-reload systemctl
     command: systemctl daemon-reload

@@ -9,8 +9,8 @@
 
   - name: Install latest pip version
     pip: name=pip state=latest
-  - name: Install ansible version 1.9.4 or greater
-    pip: name=ansible state=present version=1.9.4
+#  - name: Install ansible version 1.9.4 or greater
+#    pip: name=ansible state=present version=1.9.4
   - name: clone kolla
     git: repo=https://git.openstack.org/openstack/kolla dest=/root/kolla version=stable/mitaka
     ignore_errors: true

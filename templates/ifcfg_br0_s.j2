@@ -1,0 +1,8 @@
+DEVICE=br0.{{network.storage.vlan}}
+BOOTPROTO=none
+ONBOOT=yes
+DELAY=0
+IPADDR={% for key,value in physical.iteritems() %}{% if value.name | match (inventory_hostname) %}{{value.storage_ip}}{% endif %}{% endfor %}
+NETMASK=255.255.255.0
+VLAN=yes
+#inframgmt

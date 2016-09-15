@@ -2,17 +2,18 @@
 - hosts: install
   tasks:
   - include_vars: ./global.yml
-  - name: remove network config
-    file: dest=digitalrebar/deploy/compose/config-dir/api/config/networks/the_admin.json.mac state=absent
   - name: update network config
     template: src=templates/the_admin_json.j2 dest=digitalrebar/deploy/compose/config-dir/api/config/networks/the_admin.json.mac
+  - name: update bmc config
+    template: src=templates/bmc_json.j2 dest=digitalrebar/deploy/compose/config-dir/api/config/networks/bmc.json
   - name: update compose environment for proxy
     lineinfile: dest=/root/digitalrebar/deploy/compose/common.env line="UPSTREAM_PROXY_ADDRESS=67.20.167.99"
   - name: update compose environmet proxy port
     lineinfile: dest=/root/digitalrebar/deploy/compose/common.env line="UPSTREAM_PROXY_PORT=3128"
 
   - name: get core repo
-    git: clone=yes src=https://github.com/digitalrebar/core.git dest=/root/digitalrebar/core
+    git: clone=yes repo=https://github.com/digitalrebar/core.git dest=/root/digitalrebar/core
+    ignore_errors: true
   - name: fix network model to include broadcom interfaces
     copy: src=files/network.yml dest=/root/digitalrebar/core/barclamps/network.yml
   - name: fix nic discovery files
@@ -24,6 +25,18 @@
   - name: fix inventory plugin files
     copy: src=files/inv_rebar.rb dest=/root/digitalrebar/core/script/roles/rebar-inventory/plugin/rebar.rb
  
+  - name: get new UX repo
+    git: clone=yes repo=https://github.com/rackn/digitalrebar-ux dest=/root/digitalrebar/digitalrebar-ux
+    ignore_errors: true
+  - name: get docker barclamp repo
+    git: clone=yes repo=https://github.com/rackn/docker dest=/root/digitalrebar/docker
+    ignore_errors: true
+  - name: get hardware repo
+    git: clone=yes repo=https://github.com/rackn/hardware dest=/root/digitalrebar/hardware
+
+  - name: update hardware repo to disable ipmi discovery
+    copy: src=files/configure.rb dest=/root/digitalrebar/hardware/ipmi/chef/cookbooks/ipmi/recipes/configure.rb
+
   - name: ensure raid cache directory exists
     file: dest=/root/.cache/digitalrebar/tftpboot/files/raid/ state=directory
   - name: add RAID config files for hardware discovery/config
@@ -32,6 +45,15 @@
     - SAS2IRCU_P20.zip
     - 8.07.14_MegaCLI.zip
   
+  - name: ensure ISO directory exists
+    file: dest=/root/.cache/digitalrebar/tftpboot/isos state=directory
+  - name: copy RHEL7 ISO into cache
+    copy: src=/root/isos/rhel-server-7.2-x86_64-boot.iso dest=/root/.cache/digitalrebar/tftpboot/isos/rhel-server-7.2-x86_64-boot.iso remote_src=true
+  - name: remove "upload ISOS" tag
+    file: dest=/root/digitalrebar/deploy/tftpboot/isos/copy_isos.yes state=touch
+  - name: copy the rhel7.json bootenvironment description
+    copy: src=files/rhel7.json dest=digitalrebar/deploy/rhel7.json
+ 
   - name: update bashrc with rebar access defaults
     lineinfile: dest=/root/.bashrc  line={{item}}
     with_items:
@@ -43,8 +65,13 @@
 #  - name: update network barclamp
 #    file: src=files/network.yml dest=/root/digitalrebar/core/barclamps/network.yml
   - name: run rebar install script
-    command: ./run-in-system.sh --deploy-admin=local --admin-ip={{installserver.mgmt_ip}}/{{installserver.mgmt_netmask|ipaddr('prefix')}} --access=HOST --con-provisioner --con-dhcp --wl-hardware --wl-docker chdir=/root/digitalrebar/deploy
+    command: "./run-in-system.sh --deploy-admin=local --admin-ip={{installserver.mgmt_alt_ip}}/{{installserver.mgmt_alt_netmask|ipaddr('prefix')}} --access=HOST --con-provisioner --con-dhcp --wl-hardware --wl-docker"
+    args:
+      chdir: /root/digitalrebar/deploy
+
     register: rebar_out
   - debug: var=rebar_out
   - name: copy rebar app to /usr/local/bin
-    copy: src=/root/digitalrebar/deploy/rebar dest=/usr/local/bin/rebar remote_src=true
+    copy: src=/root/digitalrebar/deploy/rebar dest=/usr/local/bin/rebar remote_src=true mode=0755
+  - name: load rhel7 environment
+    command: "curl -X POST --data-binary @/root/digitalrebar/deploy/rhel7.json -H 'Content-Type: application/json' --digest -k --user rebar:rebar1 https://{{installserver.name}}.{{internal_domain}}/provisioner/bootenvs"

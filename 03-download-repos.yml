@@ -7,7 +7,7 @@
 #    http_proxy: https://{{ proxy_server }}
 #    HTTPS_PROXY: https://{{ proxy_server }}
 #    HTTP_PROXY: https://{{ proxy_server }}
-#    no_proxy: '10.*,192.168.*,172.*,67.20.*,69.164.*'
+#    no_proxy: {{no_proxy_domains}}
   tasks:
   - include_vars: ./global.yml
   - name: get latest el7 repo

@@ -74,13 +74,13 @@ phllcu731
 phllcu732
 
 [oshypervisors]
-phllsu328
-phllsu329
-phllsu330
+phllsu328  ansible_host=172.31.1.40
+phllsu329  ansible_host=172.31.1.41
+phllsu330  ansible_host=172.31.1.42
 
 [compute]
-phllsu331
-phllsu332
+phllsu331  ansible_host=172.31.1.43
+phllsu332  ansible_host=172.31.1.44
 
 [physical:children]
 oshypervisors

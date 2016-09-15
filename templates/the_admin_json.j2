@@ -2,28 +2,28 @@
   "category": "admin",
   "group": "internal",
   "deployment": "system",
-  "conduit": ["10g0","10g1"],
+  "conduit": "10g0,10g1",
   "team_mode": 4,
   "use_team": true,
   "ranges": [
     {
       "name": "admin",
-      "first": "10.133.210.51/24",
-      "last": "10.133.210.71/24"
+      "first": "172.31.1.51/24",
+      "last": "172.31.1.52/24"
     },
     {
       "name": "host",
-      "first": "10.133.210.81/24",
-      "last": "10.133.210.101/24"
+      "first": "172.31.1.200/24",
+      "last": "172.31.1.254/24"
     },
     {
       "name": "dhcp",
-      "first": "173.31.1.52/24",
-      "last": "173.31.1.80/24"
+      "first": "172.31.1.150/24",
+      "last": "172.31.1.199/24"
     }
   ],
   "router": {
-    "address": "173.31.1.51/24",
+    "address": "172.31.1.51/24",
     "pref": 10
   }
 }
