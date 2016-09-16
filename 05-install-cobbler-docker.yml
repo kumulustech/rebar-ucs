@@ -21,12 +21,30 @@
     - vim
     - htop
     - python-netaddr
-  - name: create ansible tower directory
-    file: dest=/root/digitalrebar state=directory
-  - name: get rebar deploy code
-    git: clone=yes dest=/root/digitalrebar/deploy repo=https://github.com/rackn/digitalrebar-deploy.git
-  - name: create deploy link
-    file: src=/root/digitalrebar dest=/root/digitalrebar/deploy/compose/digitalrebar state=link
+    - cobbler
+    - cobbler-web
+    - pykickstart
+    - fence-agents
+
+  - name: update cobbler settings file
+    template: src=templates/cobbler_settings.j2 dest=/etc/cobbler/settings
+  - name: update cobbler dhcp.template file
+    template: src=templates/dhcp_template.j2 dest=/etc/cobbler/dhcp.template
+  - name: upload dnsmasq.template
+    template: src=templates/dnsmasq_template.j2 dest=/etc/cobbler/dnsmasq.template
+  - name: upload modules.conf
+    template: src=templates/modules_conf.j2 dest=/etc/cobbler/modules.conf
+  - name: update initd tftp state
+    lineinfile: dest=/etc/xinetd.d/tftp regexp='^.*disable.*' line='        disable                 = no'
+
+# may need to set selinux params
+# setsebool -P httpd_serve_cobbler_files true
+# setsebool -P httpd_can_network_connect true
+  - name: restart cobbler
+    system: name={{item}} state=restarted enabled=yes
+    with_items:
+    - cobblerd
+    - httpd
 
   - name: environment setup
     template: src=templates/environment.j2 dest=/etc/environment
