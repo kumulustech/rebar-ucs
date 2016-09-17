@@ -2,8 +2,10 @@ DEVICE=br0.{{network.infrastructuremanagement.vlan}}
 BOOTPROTO=none
 ONBOOT=yes
 DELAY=0
-IPADDR={% for key,value in physical.iteritems() %}{% if value.name | match (inventory_hostname) %}{{value.mgmt_ip}}{% endif %}{% endfor %}
-GATEWAY={% for key,value in physical.iteritems() %}{% if value.name | match (inventory_hostname) %}{{value.gateway}}{% endif %}{% endfor %}
+IPADDR={% for key,value in physical.iteritems() %}{% if value.name | match (inventory_hostname) %}{{value.mgmt_ip}}
+{% endif %}{% endfor %}
+GATEWAY={% for key,value in physical.iteritems() %}{% if value.name | match (inventory_hostname) %}{{value.gateway}}
+{% endif %}{% endfor %}
 NETMASK=255.255.255.0
 VLAN=yes
 #inframgmt

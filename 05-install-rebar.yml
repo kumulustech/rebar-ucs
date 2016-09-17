@@ -21,10 +21,8 @@
     - vim
     - htop
     - python-netaddr
-  - name: create ansible tower directory
-    file: dest=/root/digitalrebar state=directory
   - name: get rebar deploy code
-    git: clone=yes dest=/root/digitalrebar/deploy repo=https://github.com/rackn/digitalrebar-deploy.git
+    git: clone=yes dest=/root/digitalrebar repo=https://github.com/digitalrebar/digitalrebar.git
   - name: create deploy link
     file: src=/root/digitalrebar dest=/root/digitalrebar/deploy/compose/digitalrebar state=link
 

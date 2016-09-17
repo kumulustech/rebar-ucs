@@ -1,0 +1,8 @@
+DEVICE=enp129s0f1
+BOOTPROTO=none
+ONBOOT=yes
+HWADDR={% for key,value in physical.iteritems() %}{% if value.name | match (inventory_hostname) %}{{value.mac_1}}
+{% endif %}{% endfor %}
+MASTER=bond0
+SLAVE=yes
+MTU=9000

@@ -12,24 +12,24 @@
   - name: update hostname
     template: dest=/etc/hostname src=templates/hostname.j2
   - name: force hostname
-    command: hostnamectl set-hostname {{inventory_nodename}}.{{internal_domain}}
+    command: hostnamectl set-hostname {{inventory_hostname}}.{{internal_domain}}
   - name: add physical hosts to /etc/hosts in advance of DNS updates
-    lineinfile: "dest=/etc/hosts insertafter=EOF line='{{item.value.mgmt_ip}} {{item.value.name}}.{{internal_domamin}} {{item.value.name}}'"
+    lineinfile: "dest=/etc/hosts insertafter=EOF line='{{item.value.mgmt_ip}} {{item.value.name}}.{{internal_domain}} {{item.value.name}}'"
     with_dict: "{{physical}}"
     when: not item.value.name == 'none'
-  - name: add install server to /etc/hosts
-    lineinfile: "dest=/etc/hosts line='{{installserver.mgmt_ip}} {{installserver.name}}.{{internal_domain}} {{installserver.name}}'"
 
   - name: ensure bridge-utils are installed
     yum: name=bridge-utils state=latest
+  - name: configure enp129s0f0
+    template: src=templates/ifcfg_enp129s0f0.j2 dest=/etc/sysconfig/network-scripts/ifcfg-enp129s0f0
+  - name: configure enp129s0f1
+    template: src=templates/ifcfg_enp129s0f1.j2 dest=/etc/sysconfig/network-scripts/ifcfg-enp129s0f1
   - name: create a br0 bridge
     command: brctl addbr br0
   - name: add bridge interface config in network scripts
     copy: src=files/ifcfg-br0 dest=/etc/sysconfig/network-scripts/ifcfg-br0
   - name: update bond0 to associate it with br0
-    template: src=templates/ifcfg_bond0.j2 dest=/etc/sysconfig/network-scripts/ifcfg-bond0
+    template: src=templates/ifcfg_bond.j2 dest=/etc/sysconfig/network-scripts/ifcfg-bond0
   - name: add bond0+mgmtVlan with public IP/gateway
-    template: src=templates/ifcfg_bond0_m.j2 dest=/etc/sysconfig/entwork-scripts/ifcfg-bond0.{{network.infrastructuremanagement.vlan}}
-  - name: add bond0+storageVlan with storage info
-    template: src=templates/ifcfg_bond0_s.j2 dest=/etc/sysconfig/newtork-scripts/ifcfg-bond0.{{network.storage.vlan}}
+    template: src=templates/ifcfg_br0_m.j2 dest=/etc/sysconfig/network-scripts/ifcfg-br0.{{network.infrastructuremanagement.vlan}}
 
