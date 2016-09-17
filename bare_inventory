@@ -1,0 +1,17 @@
+[oshypervisors]
+phllsu328  ansible_host=172.31.1.200
+phllsu329  ansible_host=172.31.1.201
+phllsu330  ansible_host=172.31.1.203
+
+[compute]
+phllsu331  ansible_host=172.31.1.204
+phllsu332  ansible_host=172.31.1.202
+
+[physical:children]
+oshypervisors
+compute
+
+[all:vars]
+proxy_server='67.20.167.99:3128'
+#ansible_ssh_private_key_file=~/jenkins-labd
+ansible_ssh_user=root

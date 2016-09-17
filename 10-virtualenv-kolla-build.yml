@@ -1,0 +1,33 @@
+---
+- name: virtualenv
+  hosts: install
+  become: true
+  become_user: root
+  tasks:
+  - name: install virtualenv
+    pip: name=virtualenv state=latest
+  - name: create kolla virtualenv
+    command: virtualenv . chdir=/root/kolla creates=/root/kolla/bin/activate
+
+- name: virtualenv-kolla-build
+  hosts: install
+  become: true
+  become_user: root
+  environment:
+   - VIRTUAL_ENV: /root/kolla
+   - PATH: /root/kolla/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+  tasks:
+  - include_vars: ./global.yml
+  - name: kolla-build OSP-9 Mitaka images
+    shell: kolla-build --type binary --base centos --tag 2.0.3 --registry {{installserver.name}}.{{internal_domain}}:4000 --push |& tee /var/log/kolla-build.log
+    args:
+      executable: /bin/bash
+    async: 10000
+    poll: 0
+    register: kolla_build
+  - name: wait for build to complete
+    async_status: jid={{kolla_build.ansible_job_id}}
+    register: kolla_job
+    until: kolla_job.finished
+    delay: 60
+    retries: 120

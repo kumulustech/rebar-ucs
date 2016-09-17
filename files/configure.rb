@@ -15,7 +15,9 @@
 #
 # Note : This script runs on both the admin and compute nodes.
 # It intentionally ignores the bios->enable node data flag.
+
 return
+
 unless node[:ipmi][:bmc_enable]
   Chef::Log.info("IPMI not enabled by ipmi-discover, refusing to do anything.")
   return

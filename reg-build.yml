@@ -1,0 +1,67 @@
+---
+- name: create ssh keys for jenkins users on local host
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: create key for jenkins user
+    command: ssh-keygen -t rsa -N '' -f files/jenkins creates=files/jenkins
+
+- name: build install server
+  hosts: infra
+  tasks:
+  - include_vars: ./global.yml
+  - name: ensure KVM virt tools are installed
+    yum: name=virt-install state=present
+  - name: get install-server image from {{local_repo}} if it's not already installed
+    get_url: url="http://{{local_repo}}/templates/rhel-guest-image-7.2-20160302.0.x86_64.qcow2" dest=/var/lib/libvirt/images/rhel-guest-image-7.2-20160302.0.x86_64.qcow2 mode=644
+  - name: create a new image backed by (linked to) our 64G original image
+    command: qemu-img create -f qcow2 -b rhel-guest-image-7.2-20160302.0.x86_64.qcow2 registry.qcow2
+    args:
+      chdir: /var/lib/libvirt/images
+      creates: /var/lib/libvirt/images/"registry.qcow2"
+  - name: check image size to determine if we need to resize the image to 64G
+    command: qemu-img info registry.qcow2
+    register: qemu_result
+    args:
+      chdir: /var/lib/libvirt/images
+  - name: resize the base image to 64G if it isn't already
+    command: qemu-img resize registry.qcow2 64G
+    when: "qemu_result.stdout | search('virtual size: 64G') == false"
+    args:
+      chdir: /var/lib/libvirt/images
+
+##
+# Create a cloud-init metadata and userdata file for configuring our install-server
+##
+
+  - name: ensure we have a metadata directory to build our instance from
+    file: path=/root/registry state=directory mode=0755
+  - name: create a meta-data file from the meta-data.j2 template
+    template: src=templates/meta_data.j2 dest=/root/registry/meta-data
+  - name: create a user-data file from the user-data.j2 template
+    template: src=templates/install_user_data.j2 dest=/root/registry/user-data
+  - name: create the registry cloud-init ISO image
+    command: genisoimage -output /var/lib/libvirt/images/registry-cloud-init.iso -volid cidata -joliet -rock user-data meta-data
+    args:
+      creates: /var/lib/libvirt/images/registry-cloud-init.iso
+      chdir: /root/registry/
+
+##
+# We can now create the install server with the virsh tools
+##
+  - name: check to ensure we have not previously launched our VM
+    command: virsh list --name --all
+    register: virsh_list
+  - name: launch the install server VM creation
+    command: >
+      virt-install -n registry --vcpus=4 --ram 8192
+      --os-type=linux --os-variant=rhel7 --disk path=/var/lib/libvirt/images/registry.qcow2,format=qcow2,cache=writeback,bus=virtio
+      --disk path=/var/lib/libvirt/images/registry-cloud-init.iso,device=cdrom,bus=virtio
+      --network bridge=br0,model=virtio --network bridge=br1,model=virtio --hvm --virt-type=kvm
+      --arch=x86_64 --graphics vnc --accelerate --boot hd --wait 10 --noautoconsole
+    when: "virsh_list.stdout | search('registry') == false"
+    async: 15
+    poll: 0
+  - name: wait for server to finish building
+    local_action: wait_for host=10.133.210.52 state=started delay=120 timeout=30
+    become: false

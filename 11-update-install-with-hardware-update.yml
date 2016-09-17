@@ -1,0 +1,30 @@
+---
+- name: migrate-to-install
+  hosts: install
+  become: true
+  become_user: root
+  tasks:
+  - name: create ansible directory on install server
+    file: dest=/root/{{item}} state=directory
+    with_items:
+    - ansible
+    - ansible/templates
+    - ansible/files
+  - name: copy templates
+    copy: src=templates/{{item}} dest=ansible/templates/{{item}}
+    with_items:
+    - hostname.j2
+    - ifcfg_enp129s0f0.j2
+    - ifcfg_enp129s0f1.j2
+    - ifcfg_bond.j2
+    - ifcfg_br0_m.j2
+  - name: copy static files
+    copy: src={{item}} dest=ansible/{{item}}
+    with_items:
+    - files/ifcfg-br0
+    - configure-physical-hosts.yml
+  - name: copy inventory
+    copy: src=bare_inventory dest=/root/ansible/inventory
+
+  - name: update bare metal hosts
+    command: ansible-playbook -i inventory configure-physical-hosts chdir=/root/ansible

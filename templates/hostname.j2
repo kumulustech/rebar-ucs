@@ -1,0 +1,1 @@
+{% for key,value in physical.iteritems() %}{% if value.name | match (inventory_hostname) %}{{value.name}}{% endif %}{% endfor %}

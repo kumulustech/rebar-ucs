@@ -11,9 +11,6 @@
   - name: update compose environmet proxy port
     lineinfile: dest=/root/digitalrebar/deploy/compose/common.env line="UPSTREAM_PROXY_PORT=3128"
 
-  - name: get core repo
-    git: clone=yes repo=https://github.com/digitalrebar/core.git dest=/root/digitalrebar/core
-    ignore_errors: true
   - name: fix network model to include broadcom interfaces
     copy: src=files/network.yml dest=/root/digitalrebar/core/barclamps/network.yml
   - name: fix nic discovery files
@@ -25,17 +22,21 @@
   - name: fix inventory plugin files
     copy: src=files/inv_rebar.rb dest=/root/digitalrebar/core/script/roles/rebar-inventory/plugin/rebar.rb
  
-  - name: get new UX repo
-    git: clone=yes repo=https://github.com/rackn/digitalrebar-ux dest=/root/digitalrebar/digitalrebar-ux
-    ignore_errors: true
-  - name: get docker barclamp repo
-    git: clone=yes repo=https://github.com/rackn/docker dest=/root/digitalrebar/docker
-    ignore_errors: true
-  - name: get hardware repo
-    git: clone=yes repo=https://github.com/rackn/hardware dest=/root/digitalrebar/hardware
+  - name: fix OS type in package source script
+    copy: src=files/01-config-packages-sources.sh dest=/root/digitalrebar/core/script/roles/rebar-package-sources/01-config-packages-sources.sh
+  - name: fix lldp service name in lldp.rb chef recipe
+    copy: src=files/lldpd.rb dest=/root/digitalrebar/core/chef/cookbooks/network/recipes/lldpd.rb
+#  - name: get new UX repo
+#    git: clone=yes repo=https://github.com/rackn/digitalrebar-ux dest=/root/digitalrebar/digitalrebar-ux
+#    ignore_errors: true
+#  - name: get docker barclamp repo
+#    git: clone=yes repo=https://github.com/rackn/docker dest=/root/digitalrebar/docker
+#    ignore_errors: true
+#  - name: get hardware repo
+#    git: clone=yes repo=https://github.com/rackn/hardware dest=/root/digitalrebar/hardware
 
   - name: update hardware repo to disable ipmi discovery
-    copy: src=files/configure.rb dest=/root/digitalrebar/hardware/ipmi/chef/cookbooks/ipmi/recipes/configure.rb
+    copy: src=files/configure.rb dest=/root/digitalrebar/core/chef/cookbooks/ipmi/recipes/configure.rb
 
   - name: ensure raid cache directory exists
     file: dest=/root/.cache/digitalrebar/tftpboot/files/raid/ state=directory
@@ -59,13 +60,15 @@
     with_items:
     - 'export REBAR_ENDPOINT=https://10.133.210.51'
     - 'export REBAR_KEY=rebar:rebar1'
+  - name: get rebar client
+    get_url: url=https://s3-us-west-2.amazonaws.com/rebar-cli/rebar-linux-amd64 dest=/usr/local/bin/rebar mode=0755
 
 #  - name: get core code to allow network update
 #    git: clone=yes repo=https://github.com/digitalrebar/core/ dest=/root/digitalrebar/core/
 #  - name: update network barclamp
 #    file: src=files/network.yml dest=/root/digitalrebar/core/barclamps/network.yml
   - name: run rebar install script
-    command: "./run-in-system.sh --deploy-admin=local --admin-ip={{installserver.mgmt_alt_ip}}/{{installserver.mgmt_alt_netmask|ipaddr('prefix')}} --access=HOST --con-provisioner --con-dhcp --wl-hardware --wl-docker"
+    command: "./run-in-system.sh --deploy-admin=local --admin-ip={{installserver.mgmt_alt_ip}}/{{installserver.mgmt_alt_netmask|ipaddr('prefix')}} --access=HOST --con-provisioner --con-dhcp --wl-ux --wl-digitalrebar-workloads"
     args:
       chdir: /root/digitalrebar/deploy
 
